@@ -77,7 +77,7 @@ function PonyBaseClass:SetSkin(def)
 	})
 	self.player:set_eye_offset({x=0,y=-1,z=0},{x=0,y=-3,z=0})
 	self.player:set_properties({visual_size = {x=2.5, y=2.5},})
-	self.player:set_local_animation({x=130, y=170}, {x=0, y=40}, {x=50, y=70}, {x=80, y=120}, 60)
+	--self.player:set_local_animation({x=130, y=170}, {x=0, y=40}, {x=50, y=70}, {x=80, y=120}, 60)
 end
 function PonyBaseClass:ModeTglBtn(button) --mode toggle button (combo) handler
 	local button = button or false
@@ -230,6 +230,7 @@ function Pegasus:_init(player)
 		fly  = {x = 200, y = 220},
 		baseSpeed = 60,
 	}
+	self.ascendAnimState = ""
 	self.models = {std = "pony_p.b3d", fly = "pony_p_f.b3d"}
 end
 
@@ -245,10 +246,13 @@ function Pegasus:FlightControl(ascend, descend) --fly button handler
 end
 
 function Pegasus:FlightAnim(player, control) --not clean
+	--quick hack
+	--TODO, get a better grasp of Lua OOP, instance vars are not working correctly. Make a proper constructor
+	PonyBaseClass.player = player
 	--
-	if not player then minetest.log("error", "ponyopject with nil player"); return false end
+	if not player then minetest.log("error", "ponyobject with nil player"); return false end
 	local pos = player:getpos()
-		  pos.y = pos.y - 1
+		  pos.y = pos.y - 1.5
 	local isAirborn = (minetest.get_node(pos).name == "air")
 	--if isAirborn then dbgp("is airborn") end
 	--
@@ -272,17 +276,17 @@ function Pegasus:FlightAnim(player, control) --not clean
 	self.phyModeLast = self.phyMode
 	self.wasAirborn = isAirborn
 
-	if self.oldControl == control then return end
-	self.oldControl = control
 	-- dbgp("flight anim model used")
-	if control.jump then 
-		-- dbgp("ascend anim")
-		player:set_animation(self.animations.fly, self.animations.baseSpeed, 0)
-		--player:set_local_animation(self.animations.fly, self.animations.fly, self.animations.fly, self.animations.fly, self.animations.baseSpeed)
-	else
-		-- dbgp("descend anim")
-		player:set_animation(self.animations.fly, self.animations.baseSpeed * 0.5, 0)
-		--player:set_local_animation(self.animations.fly, self.animations.fly, self.animations.fly, self.animations.fly, self.animations.baseSpeed * 0.5)
+	if control.jump and self.ascendAnimState ~= "up" then 
+		dbgp("ascend anim")
+		self.ascendAnimState = "up"
+		player:set_animation(self.animations.fly, 60, 0)
+		player:set_local_animation(self.animations.fly, self.animations.fly, self.animations.fly, self.animations.fly, self.animations.baseSpeed)
+	elseif not control.jump and self.ascendAnimState ~= "down" then
+		dbgp("descend anim")
+		self.ascendAnimState = "down"
+		player:set_animation(self.animations.fly, 30, 0)
+		player:set_local_animation(self.animations.fly, self.animations.fly, self.animations.fly, self.animations.fly, self.animations.baseSpeed * 0.5)
 	end
 	return true
 end

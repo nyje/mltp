@@ -123,7 +123,7 @@ function PonyPlayer:Main( ... )
 			local name = player:get_player_name()
 			local model= self.users[name].name
 			local ponyObject = self.users[name].model
-			ponyObject.player = player--CHANGEME
+			--ponyObject.player = player--CHANGEME
 			if model then
 				local controls = player:get_player_control()
 				local walking = false
