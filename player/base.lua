@@ -183,7 +183,7 @@ function Pegasus:__init(player)
 		self.Pony.type = "pegasus"
 		self:PhisicsMode(1)
 	end
-	self.canFly = true
+	self.Pony.canFly = true
 	self.phyModeLast = 0
 	self.animations = {
 		flap = {x = 170, y = 190},
@@ -195,7 +195,7 @@ function Pegasus:__init(player)
 end
 
 function Pegasus:FlightControl(ascend, descend) --fly button handler
-	if self.phyMode ~= 3 then return end
+	if self.Pony.phyMode ~= 3 then return end
 	if ascend then
 		self.Pony.player:set_physics_override({gravity = -0.5})
 	elseif descend then
@@ -216,24 +216,24 @@ function Pegasus:FlightAnim(control) --not clean
 	local isAirborn = (minetest.get_node(pos).name == "air")
 	--if isAirborn then dbgp("is airborn") end
 	--
-	if not isAirborn or self.phyMode ~= 3 then
-	-- if self.phyMode ~= 3 then
-		if not isAirborn and self.wasAirborn or self.phyModeLast ~= self.phyMode then
+	if not isAirborn or self.Pony.phyMode ~= 3 then
+	-- if self.Pony.phyMode ~= 3 then
+		if not isAirborn and self.wasAirborn or self.Pony.phyModeLast ~= self.Pony.phyMode then
 			Pony:SetSkin({mesh = self.Pony.models.std})
 			dbgp("flight animation unset, using model " .. self.Pony.models.std)
 		end
-		self.phyModeLast = self.phyMode
+		self.phyModeLast = self.Pony.phyMode
 		self.wasAirborn = isAirborn
 
 		return false 
 	end
-	if isAirborn and not self.wasAirborn or self.phyModeLast ~= self.phyMode then
+	if isAirborn and not self.wasAirborn or self.Pony.phyModeLast ~= self.Pony.phyMode then
 		Pony:SetSkin({mesh = self.Pony.models.fly})
 		dbgp("flight animation set, using model " .. self.Pony.models.fly)
 		--dbgp("passed player name: "..player:get_player_name())
 		dbgp("stored player name: "..self.Pony.player:get_player_name())
 	end
-	self.phyModeLast = self.phyMode
+	self.phyModeLast = self.Pony.phyMode
 	self.wasAirborn = isAirborn
 
 	-- dbgp("flight anim model used")
@@ -268,7 +268,7 @@ function Alicorn:__init(player)
 	self.Unicorn:__init()
 	--
 	self.Pony.type = "alicorn"
-	self.canFly = true
+	self.Pony.canFly = true
 	self.Pony.models = {std = "pony_a.b3d", fly = "pony_a_f.b3d"}
 	self:PhisicsMode(1)
 end

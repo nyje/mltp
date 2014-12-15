@@ -1,7 +1,7 @@
 --config
 local defaultPony = "MineLP_Daring_Do.png"
 
-local debug = false
+local debug = true
 
 ---
 local function dbgp(thing) if debug then print("[MTLP init.lua DEBUG] ".. thing) end end
@@ -49,6 +49,7 @@ function PonyPlayer:Main( ... )
 		privs = {interact = true},
 		func = function(playername, skinname) 
 			local player = minetest.get_player_by_name(playername)
+			dbgp("/skin called on/by "..playername)
 			return self:SetSkin(player, skinname)
 		end,
 	})
@@ -121,11 +122,11 @@ function PonyPlayer:Main( ... )
 				local altCombo = controls.sneak and controls.aux1
 				ponyObject:ModeTglBtn(altCombo) 
 
-				if ponyObject.canFly then
+				if ponyObject.Pony.canFly then
 					ponyObject:FlightControl(controls.jump, controls.sneak)
 				end
 
-				if not ponyObject:FlightAnim(controls) then --offload animation handling to ponyObject
+				if not ponyObject:FlightAnim(controls) then --offload control and animation handling to ponyObject
 
 					--end pony stuff, sort of
 					-- Determine if the player is walking
@@ -229,6 +230,7 @@ end
 
 function PonyPlayer:SetSkin(player, name) 
 	-- local index = 1
+	dbgp("PonyPlayer:SetSkin called on "..player:get_player_name())
 	local model = nil
 	for k, v in pairs(self.skins) do
 		if v.name == name then
@@ -260,7 +262,7 @@ function PonyPlayer:SetSkin(player, name)
 	skin:SetSkin({textures = {model.textures}})
 	---
 	self.users[player:get_player_name()] = {name = model.name, model = skin}
-	self:Save();
+	self:Save()
 	--
 	dbgp("saved pony type: "..self.users[player:get_player_name()].model.Pony.type)
 	--
