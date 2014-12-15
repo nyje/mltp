@@ -125,9 +125,9 @@ function PonyPlayer:Main( ... )
 					ponyObject:FlightControl(controls.jump, controls.sneak)
 				end
 
-				if not ponyObject:FlightAnim(player, controls) then --offload animation handling to ponyObject
+				if not ponyObject:FlightAnim(controls) then --offload animation handling to ponyObject
 
-					--end pony dtuff, sort of
+					--end pony stuff, sort of
 					-- Determine if the player is walking
 					if controls.up or controls.down or controls.left or controls.right then
 						walking = true
@@ -262,7 +262,7 @@ function PonyPlayer:SetSkin(player, name)
 	self.users[player:get_player_name()] = {name = model.name, model = skin}
 	self:Save();
 	--
-	dbgp("saved pony type: "..self.users[player:get_player_name()].model.type)
+	dbgp("saved pony type: "..self.users[player:get_player_name()].model.Pony.type)
 	--
 	return true, "Skin " .. model.name .. " set!"
 end

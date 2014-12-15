@@ -8,6 +8,5 @@
 --                                                                     |___/                     |___/ 
 --Copyright Jake Vandereay (fyregryph_)
 --Licensed as AGPL
-dofile(minetest.get_modpath("player").."/classlib.lua") --See http://lua-users.org/wiki/MultipleInheritanceClasses for info
 dofile(minetest.get_modpath("player").."/base.lua")
 dofile(minetest.get_modpath("player").."/ponyplayer.lua")

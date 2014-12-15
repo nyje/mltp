@@ -8,7 +8,7 @@
 --                                                                     |___/                     |___/ 
 --Copyright Jake Vandereay (fyregryph_)
 --Licensed as AGPL
-
+dofile(minetest.get_modpath("player").."/classlib.lua") --See http://lua-users.org/wiki/MultipleInheritanceClasses for info
 --config
 local debug = true
 local config = {
@@ -37,9 +37,9 @@ local config = {
 local function dbgp(thing) if debug then print("[MTLP base.lua DEBUG] ".. thing) end end
 --TODO: encapsulate these global vars into a object
 
-local PonyBaseClass = class()
+Pony = class("Pony") --Base class for all pony types
 
-function PonyBaseClass:__init(player) --These vars should (maybe) be in the above definition
+function Pony:__init(player) 
 	dbgp("Base init")
 	self.models = {}
 	self.player = player
@@ -56,9 +56,9 @@ function PonyBaseClass:__init(player) --These vars should (maybe) be in the abov
 	self.type = "none"
 end
 
-function PonyBaseClass:SetSkin(def)
-	dbgp("PonyBaseClass:SetSkin def >> "..dump(def)) 
-	dbgp("PonyBaseClass:SetSkin player name >> " .. self.player:get_player_name())
+function Pony:SetSkin(def)
+	dbgp("Pony:SetSkin def >> "..dump(def)) 
+	dbgp("Pony:SetSkin player name >> " .. self.player:get_player_name())
 	--
 	local mdl = def
 	self.player:set_properties({
@@ -70,7 +70,7 @@ function PonyBaseClass:SetSkin(def)
 	self.player:set_properties({visual_size = {x=2.5, y=2.5},})
 	--self.player:set_local_animation({x=130, y=170}, {x=0, y=40}, {x=50, y=70}, {x=80, y=120}, 60)
 end
-function PonyBaseClass:ModeTglBtn(button) --mode toggle button (combo) handler
+function Pony:ModeTglBtn(button) --mode toggle button (combo) handler
 	local button = button or false
 	-- button logic
 	if button == self.lastBtnState then --exit if there is no button change
@@ -87,7 +87,7 @@ function PonyBaseClass:ModeTglBtn(button) --mode toggle button (combo) handler
 	--
 	return true
 end
-function PonyBaseClass:PhisicsMode(mode)
+function Pony:PhisicsMode(mode)
 	local playername = self.player:get_player_name()
 	dbgp("player "..playername.." physics mode change")
 	--
@@ -112,25 +112,25 @@ function PonyBaseClass:PhisicsMode(mode)
 	end
 	dbgp("phyMode="..self.phyMode)
 end
-function PonyBaseClass:FlightAnim( ... )
+function Pony:FlightAnim( ... )
 	return false --disable flight in base by default
 end
 
-EarthPony = class()
+EarthPony = class("EarthPony",Pony)
 
 function EarthPony:__init(player)
 	dbgp("Earth init")
 	if player then
-		self[PonyBaseClass]:__init(player)
+		self.Pony:__init(player)
 	end
-	for k, v in pairs(config.earthAlt) do --TODO: make this a method
-		self[PonyBaseClass].physicsAlt[k] = v 
+	for k, v in pairs(config.earthAlt) do
+		--self.Pony.physicsAlt[k] = v 
 	end
-	for k, v in pairs(config.earthNormal) do --TODO: make this a method
-		self.physicsDefault[k] = v 
+	for k, v in pairs(config.earthNormal) do
+		--self.Pony.physicsDefault[k] = v 
 	end
 	if player then
-		self.type = "earth"
+		self.Pony.type = "earth"
 		self:PhisicsMode(1)
 	end
 end
@@ -140,18 +140,18 @@ function EarthPony:SetSkin(def)
 	for k, v in pairs(def) do
 		prop[k] = v
 	end
-	PonyBaseClass:SetSkin(prop)
+	Pony:SetSkin(prop)
 end
 
-Unicorn = class()
+Unicorn = class("Unicorn",Pony)
 
 function Unicorn:__init(player)
 	dbgp("Unicorn init")
 	if player then
-		PonyBaseClass:__init(player)
+		Pony:__init(player)
 	end
 	if player then
-		self.type = "unicorn"
+		self.Pony.type = "unicorn"
 		self:PhisicsMode(1)
 	end
 end
@@ -161,26 +161,26 @@ function Unicorn:SetSkin(def) --get rid of this
 	for k, v in pairs(def) do
 		prop[k] = v
 	end
-	PonyBaseClass:SetSkin(prop)
+	Pony:SetSkin(prop)
 end
 
-Pegasus = class()
+Pegasus = class("Pegasus",Pony)
 function Pegasus:__init(player) 
 	dbgp("Pegasus init")
 	if player then
-		PonyBaseClass:__init(player)
+		Pony:__init(player)
 	end
 	for k, v in pairs(config.pegasusFly) do --TODO: make this a method
-		self.physicsFly[k] = v 
+		self.Pony.physicsFly[k] = v 
 	end
 	for k, v in pairs(config.pegasusAlt) do
-		self.physicsAlt[k] = v 
+		self.Pony.physicsAlt[k] = v 
 	end
 	for k, v in pairs(config.pegasusNormal) do
-		self.physicsDefault[k] = v 
+		self.Pony.physicsDefault[k] = v 
 	end
 	if player then
-		self.type = "pegasus"
+		self.Pony.type = "pegasus"
 		self:PhisicsMode(1)
 	end
 	self.canFly = true
@@ -191,25 +191,25 @@ function Pegasus:__init(player)
 		baseSpeed = 60,
 	}
 	self.ascendAnimState = ""
-	self.models = {std = "pony_p.b3d", fly = "pony_p_f.b3d"}
+	self.Pony.models = {std = "pony_p.b3d", fly = "pony_p_f.b3d"}
 end
 
 function Pegasus:FlightControl(ascend, descend) --fly button handler
 	if self.phyMode ~= 3 then return end
 	if ascend then
-		self.player:set_physics_override({gravity = -0.5})
+		self.Pony.player:set_physics_override({gravity = -0.5})
 	elseif descend then
-		self.player:set_physics_override({gravity = 0.35})
+		self.Pony.player:set_physics_override({gravity = 0.35})
 	else
-		self.player:set_physics_override(config.pegasusFly)
+		self.Pony.player:set_physics_override(config.pegasusFly)
 	end
 end
 
-function Pegasus:FlightAnim(player, control) --not clean
+function Pegasus:FlightAnim(control) --not clean
 	--quick hack
 	--TODO, get a better grasp of Lua OOP, instance vars are not working correctly. Make a proper constructor
-	PonyBaseClass.player = player
 	--
+	local player = self.Pony.player
 	if not player then minetest.log("error", "ponyobject with nil player"); return false end
 	local pos = player:getpos()
 		  pos.y = pos.y - 1.5
@@ -219,8 +219,8 @@ function Pegasus:FlightAnim(player, control) --not clean
 	if not isAirborn or self.phyMode ~= 3 then
 	-- if self.phyMode ~= 3 then
 		if not isAirborn and self.wasAirborn or self.phyModeLast ~= self.phyMode then
-			PonyBaseClass:SetSkin({mesh = self.models.std})
-			dbgp("flight animation unset, using model " .. self.models.std)
+			Pony:SetSkin({mesh = self.Pony.models.std})
+			dbgp("flight animation unset, using model " .. self.Pony.models.std)
 		end
 		self.phyModeLast = self.phyMode
 		self.wasAirborn = isAirborn
@@ -228,10 +228,10 @@ function Pegasus:FlightAnim(player, control) --not clean
 		return false 
 	end
 	if isAirborn and not self.wasAirborn or self.phyModeLast ~= self.phyMode then
-		PonyBaseClass:SetSkin({mesh = self.models.fly})
-		dbgp("flight animation set, using model " .. self.models.fly)
-		dbgp("passed player name: "..player:get_player_name())
-		dbgp("stored player name: "..self.player:get_player_name())
+		Pony:SetSkin({mesh = self.Pony.models.fly})
+		dbgp("flight animation set, using model " .. self.Pony.models.fly)
+		--dbgp("passed player name: "..player:get_player_name())
+		dbgp("stored player name: "..self.Pony.player:get_player_name())
 	end
 	self.phyModeLast = self.phyMode
 	self.wasAirborn = isAirborn
@@ -256,20 +256,20 @@ function Pegasus:SetSkin(def)
 	for k, v in pairs(def) do
 		prop[k] = v
 	end
-	PonyBaseClass:SetSkin(prop)
+	Pony:SetSkin(prop)
 end
 
-Alicorn = class(EarthPony, Pegasus, Unicorn)
+Alicorn = class("Alicorn",EarthPony, Pegasus, Unicorn)
 
 function Alicorn:__init(player) 
-	PonyBaseClass:__init(player)
-	EarthPony:__init()
-	Pegasus:__init()
-	Unicorn:__init()
+	Pony:__init(player)
+	self.EarthPony:__init()
+	self.Pegasus:__init()
+	self.Unicorn:__init()
 	--
-	self.type = "alicorn"
+	self.Pony.type = "alicorn"
 	self.canFly = true
-	self.models = {std = "pony_a.b3d", fly = "pony_a_f.b3d"}
+	self.Pony.models = {std = "pony_a.b3d", fly = "pony_a_f.b3d"}
 	self:PhisicsMode(1)
 end
 
@@ -282,6 +282,6 @@ function Alicorn:SetSkin(def) --get rid of this
 	for k, v in pairs(def) do
 		prop[k] = v
 	end
-	PonyBaseClass:SetSkin(prop)
+	Pony:SetSkin(prop)
 end
 
