@@ -37,18 +37,9 @@ local config = {
 local function dbgp(thing) if debug then print("[MTLP base.lua DEBUG] ".. thing) end end
 --TODO: encapsulate these global vars into a object
 
-PonyBaseClass = {}
-PonyBaseClass.__index = PonyBaseClass
+local PonyBaseClass = class()
 
-setmetatable(PonyBaseClass, {
-	__call = function (cls, ...)
-		local self = setmetatable({}, cls)
-		self:_init(...)
-		return self
-	end,
-})
-
-function PonyBaseClass:_init(player) --These vars should (maybe) be in the above definition
+function PonyBaseClass:__init(player) --These vars should (maybe) be in the above definition
 	dbgp("Base init")
 	self.models = {}
 	self.player = player
@@ -125,25 +116,15 @@ function PonyBaseClass:FlightAnim( ... )
 	return false --disable flight in base by default
 end
 
-EarthPony = {}
-EarthPony.__index = EarthPony
+EarthPony = class()
 
-setmetatable(EarthPony, {
-	__index = PonyBaseClass,
-	__call = function (cls, ...)
-		local self = setmetatable({}, cls)
-		self:_init(...)
-		return self
-	end,
-})
-
-function EarthPony:_init(player)
+function EarthPony:__init(player)
 	dbgp("Earth init")
 	if player then
-		PonyBaseClass:_init(player)
+		self[PonyBaseClass]:__init(player)
 	end
 	for k, v in pairs(config.earthAlt) do --TODO: make this a method
-		self.physicsAlt[k] = v 
+		self[PonyBaseClass].physicsAlt[k] = v 
 	end
 	for k, v in pairs(config.earthNormal) do --TODO: make this a method
 		self.physicsDefault[k] = v 
@@ -162,22 +143,12 @@ function EarthPony:SetSkin(def)
 	PonyBaseClass:SetSkin(prop)
 end
 
-Unicorn = {}
-Unicorn.__index = Unicorn
+Unicorn = class()
 
-setmetatable(Unicorn, {
-	__index = PonyBaseClass,
-	__call = function (cls, ...)
-		local self = setmetatable({}, cls)
-		self:_init(...)
-		return self
-	end,
-})
-
-function Unicorn:_init(player)
+function Unicorn:__init(player)
 	dbgp("Unicorn init")
 	if player then
-		PonyBaseClass:_init(player)
+		PonyBaseClass:__init(player)
 	end
 	if player then
 		self.type = "unicorn"
@@ -193,22 +164,11 @@ function Unicorn:SetSkin(def) --get rid of this
 	PonyBaseClass:SetSkin(prop)
 end
 
-Pegasus = {}
-Pegasus.__index = Pegasus
-
-setmetatable(Pegasus, {
-	__index = PonyBaseClass,
-	__call = function (cls, ...)
-		local self = setmetatable({}, cls)
-		self:_init(...)
-		return self
-	end,
-})
-
-function Pegasus:_init(player) 
+Pegasus = class()
+function Pegasus:__init(player) 
 	dbgp("Pegasus init")
 	if player then
-		PonyBaseClass:_init(player)
+		PonyBaseClass:__init(player)
 	end
 	for k, v in pairs(config.pegasusFly) do --TODO: make this a method
 		self.physicsFly[k] = v 
@@ -299,30 +259,13 @@ function Pegasus:SetSkin(def)
 	PonyBaseClass:SetSkin(prop)
 end
 
-Alicorn = {}
-Alicorn.__index = Alicorn
+Alicorn = class(EarthPony, Pegasus, Unicorn)
 
-setmetatable(Alicorn, {
-	__index = function(table, key)
-		for i,s in ipairs({EarthPony, Unicorn, Pegasus}) do
-			if s[key] then
-				table[key] = s[key]
-				return table[key]
-			end
-		end
-	end,
-	__call = function (cls, ...)
-		local self = setmetatable({}, cls)
-		self:_init(...)
-		return self
-	end,
-})
-
-function Alicorn:_init(player) 
-	PonyBaseClass:_init(player)
-	EarthPony:_init()
-	Pegasus:_init()
-	Unicorn:_init()
+function Alicorn:__init(player) 
+	PonyBaseClass:__init(player)
+	EarthPony:__init()
+	Pegasus:__init()
+	Unicorn:__init()
 	--
 	self.type = "alicorn"
 	self.canFly = true
