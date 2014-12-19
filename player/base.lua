@@ -165,6 +165,11 @@ function Unicorn:SetSkin(def) --get rid of this
 end
 
 Pegasus = class("Pegasus",shared(Pony))
+Pegasus.animations = {
+		flap = {x = 170, y = 190},
+		fly  = {x = 200, y = 220},
+		baseSpeed = 60,
+	}
 function Pegasus:__init(player) 
 	dbgp("Pegasus init")
 	if player then
@@ -185,11 +190,6 @@ function Pegasus:__init(player)
 	end
 	self.Pony.canFly = true
 	self.phyModeLast = 0
-	self.animations = {
-		flap = {x = 170, y = 190},
-		fly  = {x = 200, y = 220},
-		baseSpeed = 60,
-	}
 	self.ascendAnimState = ""
 	self.Pony.models = {std = "pony_p.b3d", fly = "pony_p_f.b3d"}
 end
@@ -205,7 +205,8 @@ function Pegasus:FlightControl(ascend, descend) --fly button handler
 	end
 end
 
-function Pegasus:FlightAnim(control) --not clean
+function Pegasus:FlightAnim(control)
+	local static = Pegasus
 	--
 	local player = self.Pony.player
 	if not player then minetest.log("error", "ponyobject with nil player"); return false end
@@ -230,22 +231,24 @@ function Pegasus:FlightAnim(control) --not clean
 		dbgp("flight animation set, using model " .. self.Pony.models.fly)
 		--dbgp("passed player name: "..player:get_player_name())
 		dbgp("stored player name: "..self.Pony.player:get_player_name())
+		player:set_animation(static.animations.fly, 10, 2)
+		player:set_local_animation(static.animations.fly, static.animations.fly, static.animations.fly, static.animations.fly, static.animations.baseSpeed * 0.5)
 	end
 	self.Pony.phyModeLast = self.Pony.phyMode
 	self.wasAirborn = isAirborn
 
 	-- dbgp("flight anim model used")
-	if control.jump and self.ascendAnimState ~= "up" then 
-		dbgp("ascend anim")
-		self.ascendAnimState = "up"
-		player:set_animation(self.animations.fly, 60, 0)
-		player:set_local_animation(self.animations.fly, self.animations.fly, self.animations.fly, self.animations.fly, self.animations.baseSpeed)
-	elseif not control.jump and self.ascendAnimState ~= "down" then
-		dbgp("descend anim")
-		self.ascendAnimState = "down"
-		player:set_animation(self.animations.fly, 30, 0)
-		player:set_local_animation(self.animations.fly, self.animations.fly, self.animations.fly, self.animations.fly, self.animations.baseSpeed * 0.5)
-	end
+	-- if control.jump and self.ascendAnimState ~= "up" then 
+	-- 	dbgp("ascend anim")
+	-- 	self.ascendAnimState = "up"
+	-- 	player:set_animation(static.animations.fly, 30, 0) --MT might have an issue with high frame rates here
+	-- 	--player:set_local_animation(self.animations.fly, self.animations.fly, self.animations.fly, self.animations.fly, self.animations.baseSpeed)
+	-- elseif not control.jump and self.ascendAnimState ~= "down" then
+	-- 	dbgp("descend anim")
+	-- 	self.ascendAnimState = "down"
+	-- 	player:set_animation(static.animations.fly, 20, 0)
+	-- 	--player:set_local_animation(self.animations.fly, self.animations.fly, self.animations.fly, self.animations.fly, self.animations.baseSpeed * 0.5)
+	-- end
 	return true
 end
 
