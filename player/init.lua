@@ -8,5 +8,7 @@
 --                                                                     |___/                     |___/ 
 --Copyright Jake Vandereay (fyregryph_)
 --Licensed as AGPL
+_skinsSafeMode = false -- disable problematic features (unused)
 dofile(minetest.get_modpath("player").."/base.lua")
 dofile(minetest.get_modpath("player").."/ponyplayer.lua")
+print("[MTLP] Pony Player loaded!")
