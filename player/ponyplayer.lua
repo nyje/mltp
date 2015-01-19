@@ -73,21 +73,31 @@ function PonyPlayer:Main( ... )
 		})
 		unified_inventory.register_page("skin_menu", {
 			get_formspec = function(player)
+				if PonyPlayer.pageinit then --stop list from being generated multiple times
+					return false
+				else
+					PonyPlayer.pageinit = true
+				end
 				local pname = player:get_player_name()
 				local index = 0
 				local count = 1
-				for k, item in pairs(self.skins) do
-					if skinsfs then
-						skinsfs = skinsfs .. "," .. item.name
+				local skinsfs = ''
+				for index, name in pairs(self.skins.lut) do
+					local skin = self:GetSkin(name)
+					--
+					if not skin then print("[MTLP] error, fetching skin for "..name.." failed"); break end
+					--
+					if skinsfs ~= '' then
+						skinsfs = skinsfs .. "," .. skin.name
 					else
-						skinsfs = item.name
+						skinsfs = skin.name
 					end
-					if item.name == self.users[pname].name then
-						index = count
+					if skin.name == self.users[pname].name then
+						self.users[pname].index = count
 					end
 					count = count + 1
 				end
-				local formspec = "textlist[0,0;6,8;mltp:skin_list;"..skinsfs..";"..index ..";true]"	
+				local formspec = "textlist[0,0;6,8;mltp:skin_list;"..skinsfs..";"..self.users[pname].index ..";true]"	
 				return {formspec = formspec}			
 			end,
 			transparent = true
@@ -98,8 +108,8 @@ function PonyPlayer:Main( ... )
 	    -- print("Form " .. formname .. " Player "..player:get_player_name().." submitted fields "..dump(fields))
 	    -- self:SetSkin(self.skins[string.split(fields["mltp:skin_list"], ":")[2]].name)
 	    local skinindex = tonumber(string.split(fields["mltp:skin_list"], ":")[2])
-	    if not self.skins[skinindex] then skinindex = 1 end --quick fix
-	    local skinname = self.skins[skinindex].name
+	    local skinname = self:GetSkin(skinindex)
+	    --set selected skin GUI index here
 	    self:SetSkin(player, skinname)
 	    return true
 	end)
@@ -110,10 +120,10 @@ function PonyPlayer:Main( ... )
 	minetest.register_globalstep(function(dtime) --adapted from the default player.lua
 		for _, player in pairs(minetest.get_connected_players()) do
 			local name = player:get_player_name()
-			local model= self.users[name].name
+			local model = self.users[name].name
 			local ponyObject = self.users[name].model
 			--ponyObject.player = player--CHANGEME
-			if model then
+			if model and ponyObject then
 				local controls = player:get_player_control()
 				local walking = false
 				local animation_speed_mod = model.animation_speed or 30
@@ -173,17 +183,33 @@ function PonyPlayer:BuildSkinList()
 	end
 	if data and data ~= "" then
 		lines = string.split(data,"\n")
+		self.skins.skin = {}
+		self.skins.lut = {}
 		for _, line in ipairs(lines) do
-			data = string.split(line, ' ', 2)
-			self.skins[count] = {
-				name = data[1],
-				type = data[2],
-				textures = data[1],
+			local data = string.split(line, ' ', 2)
+			local name = data[1]
+			local type = data[2]
+			self.skins.skin[name] = {
+				name = name,
+				type = type,
+				textures = name
 			}
+			self.skins.lut[count] = name --create index for skins
 			count = count + 1
 		end
 		io.close(input)
 	end
+end
+
+function PonyPlayer:GetSkin(arg) --return the properties of a skin my index of name
+	if type(arg) == "number" then
+		return self.skins.skin[self.skins.lut[arg]]
+	elseif type(arg) == "string" then
+		local val = self.skins.skin[arg]
+		if val then return val end
+	end
+	print("[MLTP] skin lookup failed, argument: "..arg.." type: "..type(arg))
+	return false --on failure
 end
 
 function PonyPlayer.player_set_animation(self, player, anim_name, speed)
@@ -232,7 +258,7 @@ function PonyPlayer:SetSkin(player, name)
 	-- local index = 1
 	dbgp("PonyPlayer:SetSkin called on "..player:get_player_name())
 	local model = nil
-	for k, v in pairs(self.skins) do
+	for k, v in pairs(self.skins.skin) do
 		if v.name == name then
 			model = v
 			break
