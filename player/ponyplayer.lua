@@ -97,6 +97,8 @@ function PonyPlayer:Main( ... )
 					end
 					count = count + 1
 				end
+				if not self.users[pname].index then self.users[pname].index = 1 end --fallback index
+				--TODO Only use the index here once
 				local formspec = "textlist[0,0;6,8;mltp:skin_list;"..skinsfs..";"..self.users[pname].index ..";true]"	
 				return {formspec = formspec}			
 			end,
@@ -108,9 +110,9 @@ function PonyPlayer:Main( ... )
 	    -- print("Form " .. formname .. " Player "..player:get_player_name().." submitted fields "..dump(fields))
 	    -- self:SetSkin(self.skins[string.split(fields["mltp:skin_list"], ":")[2]].name)
 	    local skinindex = tonumber(string.split(fields["mltp:skin_list"], ":")[2])
-	    local skinname = self:GetSkin(skinindex)
+	    local skin = self:GetSkin(skinindex)
 	    --set selected skin GUI index here
-	    self:SetSkin(player, skinname)
+	    self:SetSkin(player, skin.name)
 	    return true
 	end)
 
@@ -208,7 +210,7 @@ function PonyPlayer:GetSkin(arg) --return the properties of a skin my index of n
 		local val = self.skins.skin[arg]
 		if val then return val end
 	end
-	print("[MLTP] skin lookup failed, argument: "..arg.." type: "..type(arg))
+	print("[MLTP] PonyPlayer:GetSkin skin lookup failed, arg = " .. dump(arg))
 	return false --on failure
 end
 
@@ -256,19 +258,22 @@ end
 
 function PonyPlayer:SetSkin(player, name) 
 	-- local index = 1
-	dbgp("PonyPlayer:SetSkin called on "..player:get_player_name())
+	local pname = player:get_player_name()
+	dbgp("PonyPlayer:SetSkin called on "..pname)
 	local model = nil
-	for k, v in pairs(self.skins.skin) do
-		if v.name == name then
-			model = v
-			break
-		end
-	end
+	-- for k, v in pairs(self.skins.skin) do
+	-- 	if v.name == name then
+	-- 		model = v
+	-- 		break
+	-- 	end
+	-- end
+	model = self:GetSkin(name)
 	---
 	-- local model = self.skins[index]
 	local skin
 	---
 	if not (model) then
+		print("[MLTP] PonyPlayer:SetSkin skin not found || player "..pname)
 		return false, "Skin not found"
 	end
 	---
@@ -282,6 +287,7 @@ function PonyPlayer:SetSkin(player, name)
 	elseif type == "alicorn" then
 		skin = Alicorn(player)
 	else 
+		print("[MLTP] PonyPlayer:SetSkin model type error || player "..pname)
 		return false, "model type error"
 	end
 	---
