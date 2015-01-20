@@ -40,7 +40,7 @@ function PonyPlayer:Main( ... )
 
 	minetest.register_on_leaveplayer(function (player)
 		local pname = player:get_player_name()
-		self.users[pname] = nil
+		self.users[pname].model = nil
 	end)
 
 	minetest.register_chatcommand("skin", {
@@ -73,11 +73,6 @@ function PonyPlayer:Main( ... )
 		})
 		unified_inventory.register_page("skin_menu", {
 			get_formspec = function(player)
-				if PonyPlayer.pageinit then --stop list from being generated multiple times
-					return false
-				else
-					PonyPlayer.pageinit = true
-				end
 				local pname = player:get_player_name()
 				local index = 0
 				local count = 1
