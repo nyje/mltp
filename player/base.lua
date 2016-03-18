@@ -10,7 +10,7 @@
 --Licensed as AGPL
 dofile(minetest.get_modpath("player").."/classlib.lua") --See http://lua-users.org/wiki/MultipleInheritanceClasses for info
 --config
-local debug = true
+local debug = false
 local config = {
 	pegasusAlt = {--used in alt mode (e key)
 		gravity = 0.75,

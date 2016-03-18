@@ -1,7 +1,7 @@
 --config
 local defaultPony = "MineLP_Daring_Do.png"
 
-local debug = true
+local debug = false
 
 ---
 local function dbgp(thing) if debug then print("[MTLP init.lua DEBUG] ".. thing) end end
