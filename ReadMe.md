@@ -12,6 +12,7 @@ Description here
 
     
     Copyright (C) 2014  Jake Vandereay
+    Maintained until 2016 Jason (jasonjayr)(mystik)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
