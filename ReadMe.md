@@ -7,12 +7,14 @@
                                                                          __/ |                     __/ |
                                                                         |___/                     |___/ 
 
-Description here
-
+     A MineTest mod which provides a variety of MLP models, skins, animations and behaviors.
+     Overrides the player model, animation, and maps the skin to a pony or unicorn style model.
+     Gameplay is affected in ways which will become clear as time goes on.
 
     
     Copyright (C) 2014  Jake Vandereay
     Maintained until 2016 Jason (jasonjayr)(mystik)
+    Maintained 2016- Nigel Garnett (nyje)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
