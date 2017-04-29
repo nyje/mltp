@@ -12,7 +12,7 @@
      Gameplay is affected in ways which will become clear as time goes on.
 
     
-    Copyright (C) 2014  Jake Vandereay
+    Copyright (C) 2014 Jake (fyregryph)
     Maintained until 2016 Jason (jasonjayr)(mystik)
     Maintained 2016- Nigel Garnett (nyje)
 
